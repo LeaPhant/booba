@@ -24,7 +24,7 @@ npm i @leaphant/nap.js
 #### Calculating pp for a recent score from osu! api v1.
 ```JavaScript
 import fetch from 'node-fetch';
-import { std_ppv2 } from 'nap.js';
+import { std_ppv2 } from '@leaphant/nap.js';
 
 const API_KEY = 'put api key here'; // osu! api v1 key
 const USER = '1023489';
