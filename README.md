@@ -1,5 +1,5 @@
-# nap.js – **N**ot **A** **P**P Calculator
-osu! api wrapper and helper library for all modes (heavily W.I.P.)
+# booba
+pure javascript osu! api wrapper and helper library for all modes (heavily W.I.P.)
 
 ### Roadmap
 - [ ] API wrapper
@@ -17,14 +17,14 @@ osu! api wrapper and helper library for all modes (heavily W.I.P.)
 
 ### Installation
 ```
-npm i @leaphant/nap.js
+npm i booba
 ```
 ### Usage Examples
 
 #### Calculating pp for a recent score from osu! api v1.
 ```JavaScript
 import fetch from 'node-fetch';
-import { std_ppv2 } from '@leaphant/nap.js';
+import { std_ppv2 } from 'booba';
 
 const API_KEY = 'put api key here'; // osu! api v1 key
 const USER = '1023489';
