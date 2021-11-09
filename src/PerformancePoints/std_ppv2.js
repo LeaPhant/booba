@@ -322,19 +322,21 @@ class std_ppv2 extends ppv2 {
             await this.fetchDifficulty();
         }
 
-        const n300 = this.n300, nmiss = this.nmiss, combo = this.combo;
+        const n300 = this.n300, nmiss = this.nmiss, combo = this.combo, accuracy = this.accuracy;
 
         if (fc) {
             this.n300 += this.nmiss;
             this.nmiss = 0;
             this.combo = this.map.max_combo;
+            this.accuracy = this.computeAccuracy();
         }
 
         const pp = {
             aim: this.computeAimValue(),
             speed: this.computeSpeedValue(),
             fl: this.computeFlashlightValue(),
-            acc: this.computeAccValue()
+            acc: this.computeAccValue(),
+            computed_accuracy: this.accuracy * 100
         };
 
         pp.total = this.computeTotal(pp);
@@ -343,6 +345,7 @@ class std_ppv2 extends ppv2 {
             this.n300 = n300;
             this.nmiss = nmiss;
             this.combo = combo;
+            this.accuracy = accuracy;
 
             this.pp_fc = pp;
         } else {
