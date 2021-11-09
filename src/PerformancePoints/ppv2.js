@@ -5,6 +5,7 @@ class ppv2 {
     accuracy = 1.00;
     mods = [];
     mods_enabled = 0;
+    DIFF_MODS = [];
     beatmap_api = "https://osu.lea.moe";
 
     constructor(beatmap_api) {
@@ -43,6 +44,10 @@ class ppv2 {
         const mods = new Mods(mods_enabled);
         this.mods = mods.list;
         this.mods_enabled = mods.value ?? 0;
+
+        const diff_mods = new Mods(this.mods.filter(a => this.DIFF_MODS.includes(a)));
+
+        this.mods_enabled_diff = diff_mods.value ?? 0;
 
         return this;
     }

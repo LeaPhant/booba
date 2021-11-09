@@ -2,6 +2,7 @@ import ppv2 from './ppv2.js';
 
 class std_ppv2 extends ppv2 {
     mode = 0;
+    DIFF_MODS = ['HardRock', 'Easy', 'DoubleTime', 'HalfTime', 'Flashlight'];
 
     computeAccuracy() {
         return Math.max(Math.min((this.n300 + this.n100 * 1/3 + this.n50 * 1/6)
@@ -93,7 +94,7 @@ class std_ppv2 extends ppv2 {
         if (params.beatmap != null && params.difficulty != null) {
             const { beatmap, difficulty } = params;
 
-            const diff = difficulty[this.mods_enabled];
+            const diff = difficulty[this.mods_enabled_diff];
 
             this.diff = {
                 aim: diff.aim ?? 0,
