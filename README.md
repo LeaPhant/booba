@@ -17,7 +17,7 @@ osu! api wrapper and helper library for all modes (heavily W.I.P.)
 
 ### Installation
 ```
-npm i nap.js
+npm i @leaphant/nap.js
 ```
 ### Usage Examples
 

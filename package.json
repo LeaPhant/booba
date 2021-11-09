@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "name": "nap.js",
+  "name": "@leaphant/nap.js",
   "version": "0.0.1",
   "description": "osu! helper library and api wrapper",
   "main": "src/index.js",
