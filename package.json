@@ -1,10 +1,17 @@
 {
   "type": "module",
   "name": "booba",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "osu! helper library and api wrapper",
-  "main": "src/index.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "exports": {
+    "import": "./dist/index.mjs",
+    "require": "./dist/index.cjs"
+  },
   "scripts": {
+    "build": "rm -rf ./dist && npx rollup -c",
+    "publish": "npm run build && npm publish",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -26,6 +33,10 @@
   },
   "homepage": "https://github.com/LeaPhant/booba#readme",
   "devDependencies": {
-    "dotenv": "^10.0.0"
+    "dotenv": "^10.0.0",
+    "rollup": "^2.59.0"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.6"
   }
 }
