@@ -126,7 +126,7 @@ class Mods {
                     }
                 }
             } else {
-                if (MODS_ENUM[mod] != null)) {
+                if (MODS_ENUM[mod] != null) {
                     mods_enabled |= MODS_ENUM[mod];
                 }
             }
