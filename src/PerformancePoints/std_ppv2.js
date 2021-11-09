@@ -166,9 +166,9 @@ class std_ppv2 extends ppv2 {
         let ar_factor = 0.0;
 
         if (this.map.ar > 10.33) {
-            ar_factor += 0.3 * (ar - 10.33);
+            ar_factor += 0.3 * (this.map.ar - 10.33);
         } else if (this.map.ar < 8.0) {
-            ar_factor += 0.1 * (8.0 - ar);
+            ar_factor += 0.1 * (8.0 - this.map.ar);
         }
 
         value *= 1.0 + ar_factor * length_bonus;
