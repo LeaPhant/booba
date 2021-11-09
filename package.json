@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "booba",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "osu! helper library and api wrapper",
   "main": "src/index.js",
   "scripts": {

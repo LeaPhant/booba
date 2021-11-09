@@ -312,9 +312,22 @@ class std_ppv2 extends ppv2 {
         ) * multiplier;
     }
 
-    async compute() {
+    /**
+     * 
+     * @param {bool} fc Whether to simulate a full combo
+     * @returns 
+     */
+    async compute(fc = false) {
         if (this.diff?.total == null) {
             await this.fetchDifficulty();
+        }
+
+        const n300 = this.n300, nmiss = this.nmiss, combo = this.combo;
+
+        if (fc) {
+            this.n300 += this.nmiss;
+            this.nmiss = 0;
+            this.combo = this.map.max_combo;
         }
 
         const pp = {
@@ -326,7 +339,15 @@ class std_ppv2 extends ppv2 {
 
         pp.total = this.computeTotal(pp);
 
-        this.pp = pp;
+        if (fc) {
+            this.n300 = n300;
+            this.nmiss = nmiss;
+            this.combo = combo;
+
+            this.pp_fc = pp;
+        } else {
+            this.pp = pp;
+        }
 
         return pp;
     }

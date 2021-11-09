@@ -21,6 +21,7 @@ if (process.env.API_KEY == null) {
         const pp = new std_ppv2().setPerformance(score);
 
         console.log(await pp.compute());
+        console.log(await pp.compute(true));
     } catch(e) {
         console.error(e);
     }
