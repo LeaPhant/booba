@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "booba",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "osu! helper library and api wrapper",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
