@@ -110,25 +110,26 @@ class std_ppv2 extends ppv2 {
                 nsliders: beatmap.num_sliders ?? 0,
                 nspinners: beatmap.num_spinners ?? 0
             }
+        } else {
+            this.diff = {
+                aim: params.aim,
+                speed: params.speed,
+                fl: params.fl ?? 0,
+                total: params.total
+            };
 
-            return this;
+            this.map = {
+                max_combo: params.max_combo,
+                ar: params.ar,
+                od: params.od,
+                ncircles: params.count_circles ?? 0,
+                nsliders: params.count_sliders ?? 0,
+                nspinners: params.count_spinners ?? 0,
+            }
         }
 
-        this.diff = {
-            aim: params.aim,
-            speed: params.speed,
-            fl: params.fl ?? 0,
-            total: params.total
-        };
-
-        this.map = {
-            max_combo: params.max_combo,
-            ar: params.ar,
-            od: params.od,
-            ncircles: params.count_circles ?? 0,
-            nsliders: params.count_sliders ?? 0,
-            nspinners: params.count_spinners ?? 0,
-        }
+        this.n300 = this.map.ncircles + this.map.nsliders + this.map.nspinners - this.n100 - this.n50 - this.nmiss;
+        this.total_hits = this.totalHits();
 
         return this;
     }
