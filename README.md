@@ -1,3 +1,4 @@
+<img alt="Bubble tea" src="https://twemoji.maxcdn.com/v/latest/svg/1f9cb.svg" height="120px" align="right"></img>
 # booba
 pure javascript osu! api wrapper and helper library for all modes (heavily W.I.P.)
 
