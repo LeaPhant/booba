@@ -5,11 +5,11 @@ class ppv2 {
     accuracy = 1.00;
     mods = [];
     mods_enabled = 0;
-    DIFF_MODS = [];
-    beatmap_api = "https://osu.lea.moe";
+    #DIFF_MODS = [];
+    #beatmap_api = "https://osu.lea.moe";
 
-    constructor(beatmap_api) {
-        if (beatmap_api != null) {
+    constructor(params) {
+        if (params.beatmap_api != null) {
             try {
                 new URL(beatmap_api);
 
@@ -17,6 +17,10 @@ class ppv2 {
             } catch(e) {
                 throw new Error("Not a valid URL");
             }
+        }
+
+        if (Array.isArray(params.diff_mods)) {
+            this.#DIFF_MODS = params.diff_mods;
         }
     }
 
@@ -26,7 +30,7 @@ class ppv2 {
         }
 
         try {
-            const response = await fetch(`${this.beatmap_api}/b/${this.beatmap_id}?mode=${this.mode}`);
+            const response = await fetch(`${this.#beatmap_api}/b/${this.beatmap_id}?mode=${this.mode}`);
             const { beatmap, difficulty } = await response.json();
 
             return { beatmap, difficulty };
@@ -45,7 +49,7 @@ class ppv2 {
         this.mods = mods.list;
         this.mods_enabled = mods.value ?? 0;
 
-        const diff_mods = new Mods(this.mods.filter(a => this.DIFF_MODS.includes(a)));
+        const diff_mods = new Mods(this.mods.filter(a => this.#DIFF_MODS.includes(a)));
 
         this.mods_enabled_diff = diff_mods.value ?? 0;
 

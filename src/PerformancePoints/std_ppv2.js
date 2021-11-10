@@ -2,7 +2,10 @@ import ppv2 from './ppv2.js';
 
 class std_ppv2 extends ppv2 {
     mode = 0;
-    DIFF_MODS = ['HardRock', 'Easy', 'DoubleTime', 'HalfTime', 'Flashlight'];
+
+    constructor() {
+        super({ diff_mods: ['HardRock', 'Easy', 'DoubleTime', 'HalfTime', 'Flashlight'] });
+    }
 
     computeAccuracy() {
         return Math.max(Math.min((this.n300 + this.n100 * 1/3 + this.n50 * 1/6)
