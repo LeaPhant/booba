@@ -301,7 +301,7 @@ class std_ppv2 extends ppv2 {
         let multiplier = 1.12;
 
         if (this.mods.includes('NoFail')) {
-            multiplier *= Math.max(0.9, 1.0 - 0.02 * this.nmiss);
+            multiplier *= Math.max(0.9, 1.0 - 0.02 * this.effectiveMissCount());
         }
 
         if (this.mods.includes('SpunOut')) {
