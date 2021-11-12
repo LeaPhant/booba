@@ -105,7 +105,7 @@ class std_ppv2 extends ppv2 {
                 speed: diff.speed ?? 0,
                 fl: diff.flashlight_rating ?? 0,
                 total: diff.total ?? 0,
-                slider_factor: diff.slider_factor ?? 0
+                slider_factor: diff.slider_factor ?? 1
             };
 
             this.map = {
