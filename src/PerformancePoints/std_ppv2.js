@@ -1,4 +1,5 @@
 import ppv2 from './ppv2.js';
+import { clamp } from '../Shared/Helper.js';
 
 class std_ppv2 extends ppv2 {
     mode = 0;
@@ -103,7 +104,8 @@ class std_ppv2 extends ppv2 {
                 aim: diff.aim ?? 0,
                 speed: diff.speed ?? 0,
                 fl: diff.flashlight_rating ?? 0,
-                total: diff.total ?? 0
+                total: diff.total ?? 0,
+                slider_factor: diff.slider_factor ?? 0
             };
 
             this.map = {
@@ -119,7 +121,8 @@ class std_ppv2 extends ppv2 {
                 aim: params.aim,
                 speed: params.speed,
                 fl: params.fl ?? 0,
-                total: params.total
+                total: params.total,
+                slider_factor: params.slider_factor ?? 0
             };
 
             this.map = {
@@ -178,6 +181,15 @@ class std_ppv2 extends ppv2 {
 
         if (this.mods.includes('Hidden')) {
             value *= 1.0 + 0.04 * (12.0 - this.map.ar);
+        }
+
+        const estimateDifficultSliders = Attributes.SliderCount * 0.15;
+
+        if (this.map.nsliders > 0)
+        {
+            const estimateSliderEndsDropped = clamp(Math.min(this.n100 + this.n50 + this.nmiss, this.map.max_combo - this.combo), 0, estimateDifficultSliders);
+            const sliderNerfFactor = (1 - this.diff.slider_factor) * Math.pow(1 - estimateSliderEndsDropped / estimateDifficultSliders, 3) + this.diff.slider_factor;
+            value *= sliderNerfFactor;
         }
 
         value *= this.accuracy;
