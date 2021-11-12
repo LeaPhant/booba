@@ -183,7 +183,7 @@ class std_ppv2 extends ppv2 {
             value *= 1.0 + 0.04 * (12.0 - this.map.ar);
         }
 
-        const estimateDifficultSliders = Attributes.SliderCount * 0.15;
+        const estimateDifficultSliders = this.map.nsliders * 0.15;
 
         if (this.map.nsliders > 0)
         {
