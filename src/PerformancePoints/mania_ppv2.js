@@ -127,20 +127,14 @@ class mania_ppv2 extends ppv2 {
         return value;
     }
 
-    computeAccValue() {
+    computeAccValue(strain) {
         if (this.diff.hit_window_300 <= 0) {
             return 0;
         }
 
-        /*double accuracyValue = Math.Max(0.0, 0.2 - (Attributes.GreatHitWindow - 34) * 0.006667)
-                                   * strainValue
-                                   * Math.Pow(Math.Max(0.0, scaledScore - 960000) / 40000, 1.1);*/
-        
-        let value = Math.max(0.0, 0.2 - (this.diff.hit_window_300 - 34) * 0.006667) 
-        * this.diff.total
-		* Math.pow(Math.max(0.0, this.adjustedScore() - 960000) / 40000.0, 1.1);
-
-        console.log('acc', value);
+        let value = Math.max(0.0, 0.2 - (this.diff.hit_window_300 - 34) * 0.006667)
+        * strain
+        * Math.pow(Math.max(0.0, this.adjustedScore() - 960000) / 40000, 1.1);
 
         return value;
     }
@@ -173,9 +167,11 @@ class mania_ppv2 extends ppv2 {
             await this.fetchDifficulty();
         }
 
+        const strain = this.computeStrainValue();
+
         const pp = {
-            strain: this.computeStrainValue(),
-            acc: this.computeAccValue(),
+            strain,
+            acc: this.computeAccValue(strain),
             computed_accuracy: this.accuracy * 100
         };
 
