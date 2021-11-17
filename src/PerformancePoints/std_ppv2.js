@@ -141,10 +141,6 @@ class std_ppv2 extends ppv2 {
         return this;
     }
 
-    async fetchDifficulty() {
-        this.setDifficulty(await this.fetchBeatmap());
-    }
-
     computeAimValue() {
         const nmiss_e = this.effectiveMissCount();
 

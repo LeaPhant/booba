@@ -40,9 +40,13 @@ class ppv2 {
         }
     }
 
+    async fetchDifficulty() {
+        this.setDifficulty(await this.fetchBeatmap());
+    }
+
     /**
      * Set mods.
-     * @param {number} mods_enabled Mods enum value
+     * @param {any} mods_enabled Mods
      */
     setMods(mods_enabled) {
         const mods = new Mods(mods_enabled);
