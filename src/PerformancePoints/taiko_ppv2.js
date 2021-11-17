@@ -1,6 +1,12 @@
 import ppv2 from './ppv2.js';
 
 class taiko_ppv2 extends ppv2 {
+    mode = 1;
+
+    constructor() {
+        super({ diff_mods: ['HardRock', 'Easy', 'DoubleTime', 'HalfTime'] });
+    }
+
     computeAccuracy() {
         return Math.max(Math.min((this.n100 * 1/2 + this.n300)
         / this.totalHits(), 1), 0);
@@ -17,16 +23,38 @@ class taiko_ppv2 extends ppv2 {
     /**
      * Set player performance.
      * @param {Object} params Information about the play.
-     * @param {number} params.count_300 
-     * @param {number} params.count_100 
-     * @param {number} params.count_50 
-     * @param {number} params.count_miss 
+     * @param {number} params.count300 
+     * @param {number} params.count100 
+     * @param {number} params.count50 
+     * @param {number} params.countmiss 
      */
     setPerformance(params) {
-        this.n300 = params.count_300;
-        this.n100 = params.count_100;
-        this.n50 = params.count_50;
-        this.nmiss = params.count_miss;
+        // osu! api v1 response
+        if (params?.count300 != null) {
+            if (params.beatmap_id != null) {
+                this.beatmap_id = params.beatmap_id;
+            }
+
+            this.n300 = Number(params.count300);
+            this.n100 = Number(params.count100);
+            this.n50 = Number(params.count50);
+            this.nmiss = Number(params.countmiss);
+
+            this.setMods(Number(params.enabled_mods));
+        }
+
+        // osu! api v2 response
+        else if (params?.statistics?.count_300 != null) {
+            const { statistics } = params;
+
+            this.beatmap_id = params?.beatmap?.id;
+            this.n300 = statistics.count_300;
+            this.n100 = statistics.count_100;
+            this.n50 = statistics.count_50;
+            this.nmiss = statistics.count_miss;
+
+            this.setMods(params.mods);
+        }        
 
         this.total_hits = this.totalHits();
         this.accuracy = this.computeAccuracy();
@@ -41,8 +69,12 @@ class taiko_ppv2 extends ppv2 {
      * @param {number} params.hit_window_300 300 hit window
      */
     setDifficulty(params) {
-        this.diff_total = params.total;
-        this.hit_window_300 = params.hit_window_300;
+        // beatmap api response
+        if (params.difficulty != null) {
+            params = params.difficulty[this.mods_enabled_diff];
+        }
+
+        this.diff = { ...params };
 
         return this;
     }
@@ -50,7 +82,7 @@ class taiko_ppv2 extends ppv2 {
     computeStrainValue() {
         const lengthBonus = 1 + 0.1 * Math.min(1.0, this.totalHits() / 1500.0);
 
-        let value = Math.pow(5.0 * Math.max(1.0, this.diff_total / 0.0075) - 4.0, 2.0) / 100000.0;
+        let value = Math.pow(5.0 * Math.max(1.0, this.diff.total / 0.0075) - 4.0, 2.0) / 100000.0;
 
         value *= lengthBonus;
         value *= Math.pow(0.985, this.nmiss);
@@ -69,17 +101,17 @@ class taiko_ppv2 extends ppv2 {
     }
 
     computeAccValue() {
-        if (this.hit_window_300 <= 0) {
+        if (this.diff.hit_window_300 <= 0) {
             return 0;
         }
 
-        let value = Math.pow(150.0 / this.hit_window_300, 1.1) * Math.pow(this.accuracy, 15) * 22.0;
+        let value = Math.pow(150.0 / this.diff.hit_window_300, 1.1) * Math.pow(this.accuracy, 15) * 22.0;
         value *= Math.min(1.15, Math.pow(this.totalHits() / 1500.0, 0.3));
 
         return value;
     }
 
-    computeTotal() {
+    computeTotal(pp) {
         let multiplier = 1.1;
 
         if (this.mods.includes('NoFail')) {
@@ -91,11 +123,27 @@ class taiko_ppv2 extends ppv2 {
         }
 
         let value = Math.pow(
-			Math.pow(this.computeStrainValue(), 1.1) +
-			Math.pow(this.computeAccValue(), 1.1), 1.0 / 1.1
+			Math.pow(pp.strain, 1.1) +
+			Math.pow(pp.acc, 1.1), 1.0 / 1.1
 		) * multiplier;
 
         return value;
+    }
+
+    async compute() {
+        if (this.diff?.total == null) {
+            await this.fetchDifficulty();
+        }
+
+        const pp = {
+            strain: this.computeStrainValue(),
+            acc: this.computeAccValue(),
+            computed_accuracy: this.accuracy * 100
+        };
+
+        pp.total = this.computeTotal(pp);
+
+        return pp;
     }
 }
 

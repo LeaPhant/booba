@@ -1,6 +1,18 @@
 import ppv2 from './ppv2.js';
 
 class mania_ppv2 extends ppv2 {
+    mode = 3;
+
+    constructor() {
+        const diff_mods = ['HardRock', 'Easy', 'DoubleTime', 'HalfTime'];
+
+        for (let i = 1; i < 9; i++) {
+            diff_mods.push(`Key${i}`);
+        }
+
+        super({ diff_mods });
+    }
+
     computeAccuracy() {
         return Math.max(Math.min((this.n300 + this.ngeki + this.nkatu * 2/3 + this.n100 * 1/3 + this.n50 * 1/6)
         / this.totalHits(), 1), 0);
@@ -15,32 +27,54 @@ class mania_ppv2 extends ppv2 {
     }
 
     adjustedScore() {
-        if (!this.adjusted_score) {
-            this.adjusted_score = this.score * (1.0 / this.score_multiplier);
-        }
-
-        return this.adjusted_score;
+        return this.score * (1.0 / this.diff.score_multiplier);
     }
 
     /**
      * Set player performance.
      * @param {Object} params Information about the play.
-     * @param {number} params.count_300 
-     * @param {number} params.count_100 
-     * @param {number} params.count_50 
-     * @param {number} params.count_miss 
-     * @param {number} params.count_geki
-     * @param {number} params.count_katu
+     * @param {number} params.count300
+     * @param {number} params.count100
+     * @param {number} params.count50
+     * @param {number} params.countmiss
+     * @param {number} params.countgeki
+     * @param {number} params.countkatu
      * @param {number} params.score
      */
     setPerformance(params) {
-        this.n300 = params.count_300;
-        this.n100 = params.count_100;
-        this.n50 = params.count_50;
-        this.nmiss = params.count_miss;
-        this.ngeki = params.count_geki;
-        this.nkatu = params.count_katu;
-        this.score = params.score;
+        // osu! api v1 response
+        if (params?.count300 != null) {
+            if (params.beatmap_id != null) {
+                this.beatmap_id = params.beatmap_id;
+            }
+
+            this.n300 = Number(params.count300);
+            this.n100 = Number(params.count100);
+            this.n50 = Number(params.count50);
+            this.nmiss = Number(params.countmiss);
+            this.ngeki = Number(params.countgeki);
+            this.nkatu = Number(params.countkatu);
+            
+            this.setMods(Number(params.enabled_mods));
+        }
+
+        // osu! api v2 response
+        else if (params?.statistics?.count_300 != null) {
+            const { statistics } = params;
+
+            this.beatmap_id = params?.beatmap?.id;
+            this.n300 = statistics.count_300;
+            this.n100 = statistics.count_100;
+            this.n50 = statistics.count_50;
+            this.nmiss = statistics.count_miss;
+            this.nmiss = statistics.count_miss;
+            this.ngeki = statistics.count_geki;
+            this.nkatu = statistics.count_katu;
+
+            this.setMods(params.mods);
+        }
+
+        this.score = Number(params.score);
 
         this.total_hits = this.totalHits();
         this.accuracy = this.computeAccuracy();
@@ -56,21 +90,23 @@ class mania_ppv2 extends ppv2 {
      * @param {number} params.score_multiplier Score multiplier
      */
     setDifficulty(params) {
-        this.diff_total = params.total;
-        this.hit_window_300 = params.hit_window_300;
-        this.score_multiplier = params.score_multiplier;
+        if (params.difficulty != null) {
+            params = params.difficulty[this.mods_enabled_diff];
+        }
+
+        this.diff = { ...params };
 
         return this;
     }
 
     computeStrainValue() {
-        if (this.score_multiplier <= 0) {
+        if (this.diff.score_multiplier <= 0) {
             return 0;
         }
 
         const score = this.adjustedScore();
 
-        let value = Math.pow(5.0 * Math.max(1.0, this.diff_total / 0.2) - 4.0, 2.2) / 135.0;
+        let value = Math.pow(5.0 * Math.max(1.0, this.diff.total / 0.2) - 4.0, 2.2) / 135.0;
 
         value *= 1 + 0.1 * Math.min(1.0, this.totalHits() / 1500.0);
 
@@ -92,17 +128,24 @@ class mania_ppv2 extends ppv2 {
     }
 
     computeAccValue() {
-        if (this.hit_window_300 <= 0) {
+        if (this.diff.hit_window_300 <= 0) {
             return 0;
         }
+
+        /*double accuracyValue = Math.Max(0.0, 0.2 - (Attributes.GreatHitWindow - 34) * 0.006667)
+                                   * strainValue
+                                   * Math.Pow(Math.Max(0.0, scaledScore - 960000) / 40000, 1.1);*/
         
-        let value = Math.max(0.0, 0.2 - ((this.hit_window_300 - 34) * 0.006667)) * this.diff_total
-		* Math.pow((Math.pow(0.0, (this.adjustedScore() - 960000)) / 40000.0), 1.1);
+        let value = Math.max(0.0, 0.2 - (this.diff.hit_window_300 - 34) * 0.006667) 
+        * this.diff.total
+		* Math.pow(Math.max(0.0, this.adjustedScore() - 960000) / 40000.0, 1.1);
+
+        console.log('acc', value);
 
         return value;
     }
 
-    computeTotal() {
+    computeTotal(pp) {
         let multiplier = 0.8;
 
         if (this.mods.includes('NoFail')) {
@@ -118,11 +161,27 @@ class mania_ppv2 extends ppv2 {
         }
 
         let value = Math.pow(
-            Math.pow(this.computeStrainValue(), 1.1) +
-            Math.pow(this.computeAccValue(), 1.1), 1.0 / 1.1
+            Math.pow(pp.strain, 1.1) +
+            Math.pow(pp.acc, 1.1), 1.0 / 1.1
         ) * multiplier;
 
         return value;
+    }
+
+    async compute() {
+        if (this.diff?.total == null) {
+            await this.fetchDifficulty();
+        }
+
+        const pp = {
+            strain: this.computeStrainValue(),
+            acc: this.computeAccValue(),
+            computed_accuracy: this.accuracy * 100
+        };
+
+        pp.total = this.computeTotal(pp);
+
+        return pp;
     }
 }
 

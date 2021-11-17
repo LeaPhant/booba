@@ -1,6 +1,12 @@
 import ppv2 from './ppv2.js';
 
 class catch_ppv2 extends ppv2 {
+    mode = 2;
+
+    constructor() {
+        super({ diff_mods: ['HardRock', 'Easy', 'DoubleTime', 'HalfTime'] });
+    }
+
     computeAccuracy() {
         return Math.max(Math.min((this.n50 + this.n100 + this.n300)
         / this.totalHits(), 1), 0);
@@ -25,20 +31,44 @@ class catch_ppv2 extends ppv2 {
     /**
      * Set player performance.
      * @param {Object} params Information about the play.
-     * @param {number} params.count_300
-     * @param {number} params.count_100
-     * @param {number} params.count_50
-     * @param {number} params.count_miss
-     * @param {number} params.count_katu
-     * @param {number} params.max_combo
+     * @param {number} params.count300
+     * @param {number} params.count100
+     * @param {number} params.count50
+     * @param {number} params.countmiss
+     * @param {number} params.countkatu
+     * @param {number} params.maxcombo
      */
     setPerformance(params) {
-        this.n300 = params.count_300;
-        this.n100 = params.count_100;
-        this.n50 = params.count_50;
-        this.nmiss = params.count_miss;
-        this.nkatu = params.count_katu;
-        this.combo = params.max_combo;
+        // osu! api v1 response
+        if (params?.count300 != null) {
+            if (params.beatmap_id != null) {
+                this.beatmap_id = params.beatmap_id;
+            }
+
+            this.n300 = Number(params.count300);
+            this.n100 = Number(params.count100);
+            this.n50 = Number(params.count50);
+            this.nmiss = Number(params.countmiss);
+            this.nkatu = Number(params.countkatu);
+            this.combo = Number(params.maxcombo);
+
+            this.setMods(Number(params.enabled_mods));
+        }
+
+        // osu! api v2 response
+        else if (params?.statistics?.count_300 != null) {
+            const { statistics } = params;
+
+            this.beatmap_id = params?.beatmap?.id;
+            this.n300 = statistics.count_300;
+            this.n100 = statistics.count_100;
+            this.n50 = statistics.count_50;
+            this.nmiss = statistics.count_miss;
+            this.nkatu = statistics.count_katu;
+            this.combo = params.max_combo;
+
+            this.setMods(params.mods);
+        }
 
         this.total_hits = this.totalHits();
         this.accuracy = this.computeAccuracy();
@@ -54,15 +84,20 @@ class catch_ppv2 extends ppv2 {
      * @param {number} params.max_combo Max combo
      */
     setDifficulty(params) {
-        this.diff_total = params.total;
-        this.ar = params.ar;
-        this.max_combo = params.max_combo;
+        // beatmap api response
+        if (params.difficulty != null) {
+            params = params.difficulty[this.mods_enabled_diff];
+
+            params.total = params.aim;
+        }
+
+        this.diff = { ...params };
 
         return this;
     }
 
     computeTotal() {
-        let value = Math.pow(5.0 * Math.max(1.0, this.diff_total / 0.0049) - 4.0, 2.0) / 100000.0;
+        let value = Math.pow(5.0 * Math.max(1.0, this.diff.total / 0.0049) - 4.0, 2.0) / 100000.0;
 
         const lengthBonus =
 		0.95 + 0.3 * Math.min(1.0, this.totalComboHits() / 2500.0) +
@@ -72,31 +107,31 @@ class catch_ppv2 extends ppv2 {
 
         value *= Math.pow(0.97, this.nmiss);
 
-        if (this.max_combo > 0) {
-            value *= Math.min(Math.pow(this.combo, 0.8) / pow(this.max_combo, 0.8), 1.0);
+        if (this.diff.max_combo > 0) {
+            value *= Math.min(Math.pow(this.combo, 0.8) / Math.pow(this.diff.max_combo, 0.8), 1.0);
         }
 
         let approachRateFactor = 1.0;
 
-        if (this.ar > 9) {
-            approachRateFactor += 0.1 * (this.ar - 9.0);
+        if (this.diff.ar > 9) {
+            approachRateFactor += 0.1 * (this.diff.ar - 9.0);
         }
 
-        if (this.ar > 10) {
-            approachRateFactor += 0.1 * (this.ar - 10.0);
+        if (this.diff.ar > 10) {
+            approachRateFactor += 0.1 * (this.diff.ar - 10.0);
         }
 
-        if (this.ar < 8) {
-            approachRateFactor += 0.025 * (8.0 - this.ar); 
+        if (this.diff.ar < 8) {
+            approachRateFactor += 0.025 * (8.0 - this.diff.ar); 
         }
 
         value *= approachRateFactor;
 
         if (this.mods.includes('Hidden')) {
-            if (this.ar <= 10) {
-                value *= 1.05 + 0.075 * (10.0 - this.ar);
-            } else if (this.ar > 10) {
-                value *= 1.01 + 0.04 * (11.0 - Math.min(11.0, this.ar));
+            if (this.diff.ar <= 10) {
+                value *= 1.05 + 0.075 * (10.0 - this.diff.ar);
+            } else if (this.diff.ar > 10) {
+                value *= 1.01 + 0.04 * (11.0 - Math.min(11.0, this.diff.ar));
             }
         }
 
@@ -115,6 +150,19 @@ class catch_ppv2 extends ppv2 {
         }
 
         return value;
+    }
+
+    async compute() {
+        if (this.diff?.total == null) {
+            await this.fetchDifficulty();
+        }
+
+        const pp = {
+            total: this.computeTotal(),
+            computed_accuracy: this.accuracy * 100
+        };
+
+        return pp;
     }
 }
 
