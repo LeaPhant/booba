@@ -8,9 +8,9 @@ pure javascript osu! api wrapper and helper library for all modes (heavily W.I.P
   - [ ] osu! api v2
 - [x] pp calculation
   - [x] standard
-  - [x] taiko (untested)
-  - [x] catch (untested)
-  - [x] mania (untested)
+  - [x] taiko (state: matches osu!lazer but not website)
+  - [x] catch
+  - [x] mania
 - [ ] beatmap parsing
 - [ ] difficulty calculation
 - [ ] beatmap rendering
