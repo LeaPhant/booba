@@ -33,12 +33,6 @@ class std_ppv2 extends ppv2 {
         return Math.max(this.nmiss, Math.floor(combo_based_miss_count));
     }
 
-    setBeatmap(beatmap_id) {
-        this.beatmap_id = beatmap_id;
-
-        return this;
-    }
-
     /**
      * Set player performance.
      * @param {Object} params Information about the play, can be osu! api response
@@ -52,12 +46,16 @@ class std_ppv2 extends ppv2 {
     setPerformance(params) {
         // osu! api v1 response
         if (params?.count300 != null) {
-            this.beatmap_id = params.beatmap_id;
+            if (params.beatmap_id != null) {
+                this.beatmap_id = params.beatmap_id;
+            }
+
             this.n300 = Number(params.count300);
             this.n100 = Number(params.count100);
             this.n50 = Number(params.count50);
             this.nmiss = Number(params.countmiss);
             this.combo = Number(params.maxcombo);
+
             this.setMods(Number(params.enabled_mods));
         }
 
@@ -71,6 +69,7 @@ class std_ppv2 extends ppv2 {
             this.n50 = statistics.count_50;
             this.nmiss = statistics.count_miss;
             this.combo = params.max_combo;
+            
             this.setMods(params.mods);
         }
     

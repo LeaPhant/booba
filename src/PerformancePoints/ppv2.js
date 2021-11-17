@@ -24,6 +24,12 @@ class ppv2 {
         }
     }
 
+    setBeatmap(beatmap_id) {
+        this.beatmap_id = beatmap_id;
+
+        return this;
+    }
+
     async fetchBeatmap() {
         if (this.beatmap_id == null) {
             throw new Error("No Beatmap ID given");
