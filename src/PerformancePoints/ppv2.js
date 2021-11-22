@@ -24,6 +24,11 @@ class ppv2 {
         }
     }
 
+    /** 
+     * Set beatmap
+     * @param {string|number} beatmap_id
+     * @returns {ppv2}
+     */
     setBeatmap(beatmap_id) {
         this.beatmap_id = beatmap_id;
 
@@ -53,6 +58,7 @@ class ppv2 {
     /**
      * Set mods.
      * @param {any} mods_enabled Mods
+     * @returns {ppv2}
      */
     setMods(mods_enabled) {
         const mods = new Mods(mods_enabled);
