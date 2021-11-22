@@ -152,15 +152,39 @@ class catch_ppv2 extends ppv2 {
         return value;
     }
 
-    async compute() {
+    /**
+     * 
+     * @param {bool} fc Whether to simulate a full combo
+     */
+    async compute(fc = false) {
         if (this.diff?.total == null) {
             await this.fetchDifficulty();
+        }
+
+        const n300 = this.n300, nmiss = this.nmiss, combo = this.combo, accuracy = this.accuracy;
+
+        if (fc) {
+            this.n300 += this.nmiss;
+            this.nmiss = 0;
+            this.combo = this.diff.max_combo;
+            this.accuracy = this.computeAccuracy();
         }
 
         const pp = {
             total: this.computeTotal(),
             computed_accuracy: this.accuracy * 100
         };
+
+        if (fc) {
+            this.n300 = n300;
+            this.nmiss = nmiss;
+            this.combo = combo;
+            this.accuracy = accuracy;
+
+            this.pp_fc = pp;
+        } else {
+            this.pp = pp;
+        }
 
         return pp;
     }
