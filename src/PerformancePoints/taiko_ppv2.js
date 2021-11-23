@@ -156,7 +156,7 @@ class taiko_ppv2 extends ppv2 {
      * @param {bool} fc Whether to simulate a full combo
      */
     async compute(fc = false) {
-        const n300 = this.n300, nmiss = this.nmiss
+        const n300 = this.n300, nmiss = this.nmiss, accuracy = this.accuracy;
 
         if (this.diff?.total == null) {
             await this.fetchDifficulty();
