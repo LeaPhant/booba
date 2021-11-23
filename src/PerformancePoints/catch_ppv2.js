@@ -7,11 +7,19 @@ class catch_ppv2 extends ppv2 {
         super({ diff_mods: ['HardRock', 'Easy', 'DoubleTime', 'HalfTime'] });
     }
 
+    /**
+     * Calculate accuracy
+     * @returns {number}
+     */
     computeAccuracy() {
         return Math.max(Math.min((this.n50 + this.n100 + this.n300)
         / this.totalHits(), 1), 0);
     }
 
+    /**
+     * Calculate total hits
+     * @returns {number}
+     */
     totalHits() {
         if (!this.total_hits) {
             this.total_hits = this.n300 + this.n100 + this.n50 + this.nmiss + this.nkatu;
@@ -20,6 +28,10 @@ class catch_ppv2 extends ppv2 {
         return this.total_hits;
     }
 
+    /**
+     * Calculate total object count
+     * @returns {number}
+     */
     totalComboHits() {
         if (!this.total_combo_hits) {
             this.total_combo_hits = this.n300 + this.n100 + this.nmiss;
@@ -96,6 +108,10 @@ class catch_ppv2 extends ppv2 {
         return this;
     }
 
+    /**
+     * Compute total pp
+     * @returns {number}
+     */
     computeTotal() {
         let value = Math.pow(5.0 * Math.max(1.0, this.diff.total / 0.0049) - 4.0, 2.0) / 100000.0;
 

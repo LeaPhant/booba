@@ -336,7 +336,7 @@ class std_ppv2 extends ppv2 {
 
     /**
      * Compute total pp from separate skills
-     * @param {object} pp Whether to simulate a full combo
+     * @param {object} pp Object with pp values for all skills
      * @returns {number}
      */
     computeTotal(pp) {

@@ -13,11 +13,19 @@ class mania_ppv2 extends ppv2 {
         super({ diff_mods });
     }
 
+    /**
+     * Calculate accuracy
+     * @returns {number}
+     */
     computeAccuracy() {
         return Math.max(Math.min((this.n300 + this.ngeki + this.nkatu * 2/3 + this.n100 * 1/3 + this.n50 * 1/6)
         / this.totalHits(), 1), 0);
     }
 
+    /**
+     * Calculate total hits
+     * @returns {number}
+     */
     totalHits() {
         if (!this.total_hits) {
             this.total_hits = this.n300 + this.n100 + this.n50 + this.nmiss + this.ngeki + this.nkatu
@@ -26,6 +34,10 @@ class mania_ppv2 extends ppv2 {
         return this.total_hits;
     }
 
+    /**
+     * Calculate score without mod multipliers
+     * @returns {number}
+     */
     adjustedScore() {
         return this.score * (1.0 / this.diff.score_multiplier);
     }
@@ -99,6 +111,10 @@ class mania_ppv2 extends ppv2 {
         return this;
     }
 
+    /**
+     * Compute strain skill pp
+     * @returns {number}
+     */
     computeStrainValue() {
         if (this.diff.score_multiplier <= 0) {
             return 0;
@@ -127,6 +143,10 @@ class mania_ppv2 extends ppv2 {
         return value;
     }
 
+    /**
+     * Compute acc skill pp
+     * @returns {number}
+     */
     computeAccValue(strain) {
         if (this.diff.hit_window_300 <= 0) {
             return 0;
@@ -139,6 +159,11 @@ class mania_ppv2 extends ppv2 {
         return value;
     }
 
+    /**
+     * Compute total pp from separate skills
+     * @param {object} pp Object with pp values for all skills
+     * @returns {number}
+     */
     computeTotal(pp) {
         let multiplier = 0.8;
 
@@ -162,6 +187,9 @@ class mania_ppv2 extends ppv2 {
         return value;
     }
 
+    /**
+     * Calculate pp and automatically fetch beatmap difficulty
+     */
     async compute() {
         if (this.diff?.total == null) {
             await this.fetchDifficulty();
