@@ -8,15 +8,27 @@ class std_ppv2 extends ppv2 {
         super({ diff_mods: ['HardRock', 'Easy', 'DoubleTime', 'HalfTime', 'Flashlight'] });
     }
 
+    /**
+     * Calculate accuracy
+     * @returns {number}
+     */
     computeAccuracy() {
         return Math.max(Math.min((this.n300 + this.n100 * 1/3 + this.n50 * 1/6)
         / this.totalHits(), 1), 0);
     }
 
+    /**
+     * Calculate total hits
+     * @returns {number}
+     */
     totalHits() {
         return this.n300 + this.n100 + this.n50 + this.nmiss;
     }
 
+    /**
+     * Calculate effective miss count with sliderbreaks
+     * @returns {number}
+     */
     effectiveMissCount() {
         let combo_based_miss_count = 0.0;
 
@@ -42,6 +54,7 @@ class std_ppv2 extends ppv2 {
      * @param {number} params.count50 
      * @param {number} params.countmiss 
      * @param {number} params.maxcombo
+     * @returns {std_ppv2}
      */
     setPerformance(params) {
         // osu! api v1 response
@@ -80,7 +93,7 @@ class std_ppv2 extends ppv2 {
     }
 
     /**
-     * Set the beatmap difficulty attributes.
+     * Set the beatmap difficulty attributes
      * @param {object} params Information about the beatmap
      * @param {number} params.max_combo Maximum achievable combo
      * @param {number} params.aim Aim stars
@@ -91,6 +104,7 @@ class std_ppv2 extends ppv2 {
      * @param {number} params.count_circles Amount of hit circles
      * @param {number} params.count_sliders Amount of hit circles
      * @param {number} params.count_spinners Amount of hit circles
+     * @returns {std_ppv2}
      */
     setDifficulty(params) {
         // beatmap api response
@@ -140,6 +154,10 @@ class std_ppv2 extends ppv2 {
         return this;
     }
 
+    /**
+     * Compute aim skill pp
+     * @returns {number}
+     */
     computeAimValue() {
         const nmiss_e = this.effectiveMissCount();
 
@@ -194,6 +212,10 @@ class std_ppv2 extends ppv2 {
         return value;
     }
 
+    /**
+     * Compute speed skill pp
+     * @returns {number}
+     */
     computeSpeedValue() {
         const nmiss_e = this.effectiveMissCount();
 
@@ -231,6 +253,10 @@ class std_ppv2 extends ppv2 {
         return value;
     }
 
+    /**
+     * Compute acc skill pp
+     * @returns {number}
+     */
     computeAccValue() {
         let better_acc_percentage;
         let n_objects_with_acc;
@@ -267,6 +293,10 @@ class std_ppv2 extends ppv2 {
         return value;
     }
 
+    /**
+     * Compute flashlight skill pp
+     * @returns {number}
+     */
     computeFlashlightValue() {
         let value = 0;
 
@@ -304,6 +334,11 @@ class std_ppv2 extends ppv2 {
         return value;
     }
 
+    /**
+     * Compute total pp from separate skills
+     * @param {object} pp Whether to simulate a full combo
+     * @returns {number}
+     */
     computeTotal(pp) {
         let multiplier = 1.12;
 
@@ -324,9 +359,8 @@ class std_ppv2 extends ppv2 {
     }
 
     /**
-     * 
+     * Calculate pp and automatically fetch beatmap difficulty
      * @param {bool} fc Whether to simulate a full combo
-     * @returns 
      */
     async compute(fc = false) {
         if (this.diff?.total == null) {
