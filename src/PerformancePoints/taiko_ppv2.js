@@ -7,11 +7,19 @@ class taiko_ppv2 extends ppv2 {
         super({ diff_mods: ['HardRock', 'Easy', 'DoubleTime', 'HalfTime'] });
     }
 
+    /**
+     * Calculate accuracy
+     * @returns {number}
+     */
     computeAccuracy() {
         return Math.max(Math.min((this.n100 * 1/2 + this.n300)
         / this.totalHits(), 1), 0);
     }
 
+    /**
+     * Calculate total hits
+     * @returns {number}
+     */
     totalHits() {
         if (!this.total_hits) {
             this.total_hits = this.n300 + this.n100 + this.n50 + this.nmiss;
@@ -79,6 +87,10 @@ class taiko_ppv2 extends ppv2 {
         return this;
     }
 
+    /**
+     * Compute strain skill pp
+     * @returns {number}
+     */
     computeStrainValue() {
         const lengthBonus = 1 + 0.1 * Math.min(1.0, this.totalHits() / 1500.0);
 
@@ -100,6 +112,10 @@ class taiko_ppv2 extends ppv2 {
         return value;
     }
 
+    /**
+     * Compute acc skill pp
+     * @returns {number}
+     */
     computeAccValue() {
         if (this.diff.hit_window_300 <= 0) {
             return 0;
@@ -111,6 +127,11 @@ class taiko_ppv2 extends ppv2 {
         return value;
     }
 
+    /**
+     * Compute total pp from separate skills
+     * @param {object} pp Object with pp values for all skills
+     * @returns {number}
+     */
     computeTotal(pp) {
         let multiplier = 1.1;
 
@@ -130,9 +151,21 @@ class taiko_ppv2 extends ppv2 {
         return value;
     }
 
-    async compute() {
+    /**
+     * Calculate pp and automatically fetch beatmap difficulty
+     * @param {bool} fc Whether to simulate a full combo
+     */
+    async compute(fc = false) {
+        const n300 = this.n300, nmiss = this.nmiss
+
         if (this.diff?.total == null) {
             await this.fetchDifficulty();
+        }
+
+        if (fc) {
+            this.n300 += this.nmiss;
+            this.nmiss = 0;
+            this.accuracy = this.computeAccuracy();
         }
 
         const pp = {
@@ -142,6 +175,16 @@ class taiko_ppv2 extends ppv2 {
         };
 
         pp.total = this.computeTotal(pp);
+
+        if (fc) {
+            this.n300 = n300;
+            this.nmiss = nmiss;
+            this.accuracy = accuracy;
+
+            this.pp_fc = pp;
+        } else {
+            this.pp = pp;
+        }
 
         return pp;
     }
