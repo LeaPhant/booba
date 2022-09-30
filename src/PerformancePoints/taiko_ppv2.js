@@ -29,6 +29,26 @@ class taiko_ppv2 extends ppv2 {
     }
 
     /**
+     * Calculate total successful hits
+     * @returns {number}
+     */
+    totalSuccessfulHits() {
+        if (!this.total_successful_hits) {
+            this.total_successful_hits = this.n300 + this.n100 + this.n50;
+        }
+
+        return this.total_successful_hits;
+    }
+
+    /**
+     * Calculate effective miss count
+     * @returns {number}
+     */
+    effectiveMissCount() {
+        return Math.max(1.0, Math.min(0, 1000.0 / this.totalSuccessfulHits())) * this.nmiss;
+    }
+
+    /**
      * Set player performance.
      * @param {Object} params Information about the play.
      * @param {number} params.count300 
@@ -94,20 +114,28 @@ class taiko_ppv2 extends ppv2 {
     computeStrainValue() {
         const lengthBonus = 1 + 0.1 * Math.min(1.0, this.totalHits() / 1500.0);
 
-        let value = Math.pow(5.0 * Math.max(1.0, this.diff.total / 0.0075) - 4.0, 2.0) / 100000.0;
+        let value = Math.pow(5 * Math.max(1.0, this.diff.total / 0.115) - 4.0, 2.25) / 1150.0;
 
         value *= lengthBonus;
-        value *= Math.pow(0.985, this.nmiss);
+        value *= Math.pow(0.986, this.effectiveMissCount());
+
+        if (this.mods.includes('Easy')) {
+            value *= 0.985;
+        }
 
         if (this.mods.includes('Hidden')) {
             value *= 1.025;
         }
 
-        if (this.mods.includes('Flashlight')) {
-            value *= 1.05 * lengthBonus;
+        if (this.mods.includes('HardRock')) {
+            value *= 1.050;
         }
 
-        value *= this.accuracy;
+        if (this.mods.includes('Flashlight')) {
+            value *= 1.050 * lengthBonus;
+        }
+
+        value *= Math.pow(this.accuracy, 2.0);
 
         return value;
     }
@@ -121,8 +149,18 @@ class taiko_ppv2 extends ppv2 {
             return 0;
         }
 
-        let value = Math.pow(150.0 / this.diff.hit_window_300, 1.1) * Math.pow(this.accuracy, 15) * 22.0;
-        value *= Math.min(1.15, Math.pow(this.totalHits() / 1500.0, 0.3));
+        let value
+        = Math.pow(60.0 / this.diff.hit_window_300, 1.1) 
+        * Math.pow(this.accuracy, 8.0) 
+        * Math.pow(this.diff.total, 0.4) 
+        * 27.0;
+
+        const lengthBonus = Math.min(1.15, Math.pow(this.totalHits() / 1500.0, 0.3));
+        value *= lengthBonus;
+
+        if (this.mods.includes('Hidden') && this.mods.includes('Flashlight')) {
+            value *= Math.max(1.050, 1.075 * lengthBonus);
+        }
 
         return value;
     }
@@ -133,14 +171,14 @@ class taiko_ppv2 extends ppv2 {
      * @returns {number}
      */
     computeTotal(pp) {
-        let multiplier = 1.1;
+        let multiplier = 1.13;
 
-        if (this.mods.includes('NoFail')) {
-            multiplier *= 0.90;
+        if (this.mods.includes('Easy')) {
+            multiplier *= 0.975;
         }
 
         if (this.mods.includes('Hidden')) {
-            multiplier *= 1.10;
+            multiplier *= 1.075;
         }
 
         let value = Math.pow(
