@@ -308,10 +308,6 @@ class std_ppv2 extends ppv2 {
 
         value = Math.pow(this.diff.fl, 2.0) * 25.0;
 
-        if (this.mods.includes('Hidden')) {
-            value *= 1.3;
-        }
-
         if (this.nmiss > 0) {
             value *= 0.97 * Math.pow(1 - Math.pow(this.nmiss / this.total_hits, 0.775), Math.pow(this.nmiss, 0.875));
         }
