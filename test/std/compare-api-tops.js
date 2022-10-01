@@ -60,7 +60,7 @@ describe('[std] compare top 100 of -GN to calculated values', () => {
             const play = new std_ppv2().setPerformance(score).setDifficulty(beatmap);
             const pp = await play.compute();
 
-            assert.almostEqual(pp.total, score.pp, 0.01, `/b/${score.beatmap_id} ${beatmap.beatmap.title} (${pp.aim} aim, ${pp.speed} speed, ${pp.fl} flashlight)`);
+            assert.almostEqual(pp.total, score.pp, 0, `/b/${score.beatmap_id} ${beatmap.beatmap.title} (${pp.aim} aim, ${pp.speed} speed, ${pp.acc} acc, ${pp.fl} flashlight)`);
         });
     }
 });
