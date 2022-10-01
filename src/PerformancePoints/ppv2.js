@@ -65,7 +65,12 @@ class ppv2 {
         this.mods = mods.list;
         this.mods_enabled = mods.value ?? 0;
 
-        const diff_mods = new Mods(this.mods.filter(a => this.#DIFF_MODS.includes(a)));
+        // Only include Hidden in the diff_mods together with Flashlight
+        if (mods.list.includes('Hidden') && !mods.list.includes('Flashlight')) {
+            mods.list = mods.list.filter(m => m !== 'Hidden')
+        }
+
+        const diff_mods = new Mods(mods.list.filter(a => this.#DIFF_MODS.includes(a)));
 
         this.mods_enabled_diff = diff_mods.value ?? 0;
 

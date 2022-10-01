@@ -5,7 +5,7 @@ class std_ppv2 extends ppv2 {
     mode = 0;
 
     constructor() {
-        super({ diff_mods: ['HardRock', 'Easy', 'DoubleTime', 'HalfTime', 'Flashlight'] });
+        super({ diff_mods: ['TouchDevice', 'Hidden', 'HardRock', 'Easy', 'DoubleTime', 'HalfTime', 'Flashlight'] });
     }
 
     /**
@@ -40,9 +40,9 @@ class std_ppv2 extends ppv2 {
             }
         }
 
-        combo_based_miss_count = Math.min(combo_based_miss_count, this.totalHits());
+        combo_based_miss_count = Math.min(combo_based_miss_count, this.n100 + this.n50 + this.nmiss);
 
-        return Math.max(this.nmiss, Math.floor(combo_based_miss_count));
+        return Math.max(this.nmiss, combo_based_miss_count);
     }
 
     /**
@@ -118,7 +118,8 @@ class std_ppv2 extends ppv2 {
                 speed: diff.speed ?? 0,
                 fl: diff.flashlight_rating ?? 0,
                 total: diff.total ?? 0,
-                slider_factor: diff.slider_factor ?? 1
+                slider_factor: diff.slider_factor ?? 1,
+                speed_note_count: diff.speed_note_count ?? 0
             };
 
             this.map = {
@@ -135,7 +136,8 @@ class std_ppv2 extends ppv2 {
                 speed: params.speed,
                 fl: params.fl ?? 0,
                 total: params.total,
-                slider_factor: params.slider_factor ?? 0
+                slider_factor: params.slider_factor ?? 0,
+                speed_note_count: params.speed_note_count ?? 0
             };
 
             this.map = {
@@ -161,13 +163,7 @@ class std_ppv2 extends ppv2 {
     computeAimValue() {
         const nmiss_e = this.effectiveMissCount();
 
-        let raw_aim = this.diff.aim;
-
-        if (this.mods.includes('TouchDevice')) {
-            raw_aim = Math.pow(rawAim, 0.8);
-        }
-
-        let value = Math.pow(5.0 * Math.max(1.0, raw_aim / 0.0675) - 4.0, 3.0) / 100000.0;
+        let value = Math.pow(5.0 * Math.max(1.0, this.diff.aim / 0.0675) - 4.0, 3.0) / 100000.0;
 
         let length_bonus = 0.95 + 0.4 * Math.min(1.0, this.total_hits / 2000.0) +
         (this.total_hits > 2000 ? Math.log10(this.total_hits / 2000.0) * 0.5 : 0.0);
@@ -187,7 +183,7 @@ class std_ppv2 extends ppv2 {
         if (this.map.ar > 10.33) {
             ar_factor += 0.3 * (this.map.ar - 10.33);
         } else if (this.map.ar < 8.0) {
-            ar_factor += 0.1 * (8.0 - this.map.ar);
+            ar_factor += 0.05 * (8.0 - this.map.ar);
         }
 
         value *= 1.0 + ar_factor * length_bonus;
@@ -246,9 +242,15 @@ class std_ppv2 extends ppv2 {
             value *= 1.0 + 0.04 * (12.0 - this.map.ar);
         }
 
-        value *= (0.95 + Math.pow(this.map.od, 2) / 750) * Math.pow(this.accuracy, (14.5 - Math.max(this.map.od, 8.0)) / 2);
+        let relevant_total_diff = this.total_hits - this.diff.speed_note_count;
+        let relevant_count_great = Math.max(0, this.n300 - relevant_total_diff);
+        let relevant_count_ok = Math.max(0, this.n100 - Math.max(0, relevant_total_diff - this.n300));
+        let relevant_count_meh = Math.max(0, this.n50 - Math.max(0, relevant_total_diff - this.n300 - this.n100));
+        let relevant_accuracy = this.diff.speed_note_count == 0 ? 0 : (relevant_count_great * 6.0 + relevant_count_ok * 2.0 + relevant_count_meh) / (this.diff.speed_note_count * 6.0);
 
-        value *= Math.pow(0.98, this.n50 < this.total_hits / 500.0 ? 0.0 : this.n50 - this.total_hits / 500.0);
+        value *= (0.95 + Math.pow(this.map.od, 2) / 750) * Math.pow((this.accuracy + relevant_accuracy) / 2.0, (14.5 - Math.max(this.map.od, 8.0)) / 2);
+
+        value *= Math.pow(0.99, this.n50 < this.total_hits / 500.0 ? 0.0 : this.n50 - this.total_hits / 500.0);
 
         return value;
     }
@@ -304,17 +306,7 @@ class std_ppv2 extends ppv2 {
             return value;
         }
 
-        let raw_fl = this.diff.fl;
-
-        if (this.mods.includes('TouchDevice')) {
-            raw_fl = Math.pow(raw_fl, 0.8);
-        }
-
-        value = Math.pow(raw_fl, 2.0) * 25.0;
-
-        if (this.mods.includes('Hidden')) {
-            value *= 1.3;
-        }
+        value = Math.pow(this.diff.fl, 2.0) * 25.0;
 
         if (this.nmiss > 0) {
             value *= 0.97 * Math.pow(1 - Math.pow(this.nmiss / this.total_hits, 0.775), Math.pow(this.nmiss, 0.875));
@@ -340,7 +332,7 @@ class std_ppv2 extends ppv2 {
      * @returns {number}
      */
     computeTotal(pp) {
-        let multiplier = 1.12;
+        let multiplier = 1.14;
 
         if (this.mods.includes('NoFail')) {
             multiplier *= Math.max(0.9, 1.0 - 0.02 * this.effectiveMissCount());
