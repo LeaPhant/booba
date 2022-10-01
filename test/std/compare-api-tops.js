@@ -10,7 +10,7 @@ chai.use(chaiStats);
 const { assert } = chai;
 
 if (process.env.API_KEY == null) {
-    throw new Error("No osu! api key provided");
+    throw new Error("No osu! api v1 key provided (Use API_KEY env variable)");
 }
 
 async function fetchTopPlays() {
