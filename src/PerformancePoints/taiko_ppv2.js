@@ -45,7 +45,7 @@ class taiko_ppv2 extends ppv2 {
      * @returns {number}
      */
     effectiveMissCount() {
-        return Math.max(1.0, Math.min(0, 1000.0 / this.totalSuccessfulHits())) * this.nmiss;
+        return Math.max(1.0, 1000.0 / this.totalSuccessfulHits()) * this.nmiss;
     }
 
     /**
@@ -112,9 +112,9 @@ class taiko_ppv2 extends ppv2 {
      * @returns {number}
      */
     computeStrainValue() {
-        const lengthBonus = 1 + 0.1 * Math.min(1.0, this.totalHits() / 1500.0);
-
         let value = Math.pow(5 * Math.max(1.0, this.diff.total / 0.115) - 4.0, 2.25) / 1150.0;
+
+        const lengthBonus = 1 + 0.1 * Math.min(1.0, this.totalHits() / 1500.0);
 
         value *= lengthBonus;
         value *= Math.pow(0.986, this.effectiveMissCount());
@@ -173,13 +173,13 @@ class taiko_ppv2 extends ppv2 {
     computeTotal(pp) {
         let multiplier = 1.13;
 
-        if (this.mods.includes('Easy')) {
-            multiplier *= 0.975;
-        }
-
         if (this.mods.includes('Hidden')) {
             multiplier *= 1.075;
         }
+
+        if (this.mods.includes('Easy')) {
+            multiplier *= 0.975;
+        }        
 
         let value = Math.pow(
 			Math.pow(pp.strain, 1.1) +
