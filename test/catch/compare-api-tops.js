@@ -14,7 +14,7 @@ if (process.env.API_KEY == null) {
 }
 
 async function fetchTopPlays() {
-    const response = await fetch(`https://osu.ppy.sh/api/get_user_best?k=${process.env.API_KEY}&u=4158549&limit=100&m=2`);
+    const response = await fetch(`https://osu.ppy.sh/api/get_user_best?k=${process.env.API_KEY}&u=214187&limit=100&m=2`);
     const json = await response.json();
 
     if (json.error != null) {
@@ -31,7 +31,7 @@ async function fetchBeatmaps(beatmapIds) {
     return json;
 }
 
-describe('compare top 100 of CTB Rushia1 to calculated values', () => {
+describe('[catch] compare top 100 of ExGon to calculated values', () => {
     const scores = [], beatmaps = [];
 
     before(done => {
@@ -60,7 +60,7 @@ describe('compare top 100 of CTB Rushia1 to calculated values', () => {
             const play = new catch_ppv2().setPerformance(score).setDifficulty(beatmap);
             const pp = await play.compute();
 
-            assert.almostEqual(pp.total, score.pp, 0, `/b/${score.beatmap_id} ${beatmap.beatmap.title}`);
+            assert.almostEqual(pp.total, score.pp, 0, `/b/${score.beatmap_id} ${beatmap.beatmap.title} (+${play.mods})`);
         });
     }
 });

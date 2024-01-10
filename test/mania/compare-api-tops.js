@@ -14,7 +14,7 @@ if (process.env.API_KEY == null) {
 }
 
 async function fetchTopPlays() {
-    const response = await fetch(`https://osu.ppy.sh/api/get_user_best?k=${process.env.API_KEY}&u=259972&limit=100&m=3`);
+    const response = await fetch(`https://osu.ppy.sh/api/get_user_best?k=${process.env.API_KEY}&u=758406&limit=100&m=3`);
     const json = await response.json();
 
     if (json.error != null) {
@@ -31,7 +31,7 @@ async function fetchBeatmaps(beatmapIds) {
     return json;
 }
 
-describe('[mania] compare top 100 of jakads to calculated values', () => {
+describe('[mania] compare top 100 of dressurf to calculated values', () => {
     const scores = [], beatmaps = [];
 
     before(done => {
@@ -60,7 +60,7 @@ describe('[mania] compare top 100 of jakads to calculated values', () => {
             const play = new mania_ppv2().setPerformance(score).setDifficulty(beatmap);
             const pp = await play.compute();
 
-            assert.almostEqual(pp.total, score.pp, 0, `/b/${score.beatmap_id} ${beatmap.beatmap.title} (${pp.strain} strain, ${pp.acc} acc)`);
+            assert.almostEqual(pp.total, score.pp, 0, `/b/${score.beatmap_id} ${beatmap.beatmap.title} (${pp.strain} strain) (+${play.mods})`);
         });
     }
 });

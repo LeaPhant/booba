@@ -60,7 +60,7 @@ describe('[taiko] compare top 100 of syaron105 to calculated values', () => {
             const play = new taiko_ppv2().setPerformance(score).setDifficulty(beatmap);
             const pp = await play.compute();
 
-            assert.almostEqual(pp.total, score.pp, 0, `/b/${score.beatmap_id} ${beatmap.beatmap.title} (${pp.strain} strain, ${pp.acc} acc)`);
+            assert.almostEqual(pp.total, score.pp, 0, `/b/${score.beatmap_id} ${beatmap.beatmap.title} (${pp.strain} strain, ${pp.acc} acc) (+${play.mods})`);
         });
     }
 });
