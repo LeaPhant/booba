@@ -89,16 +89,16 @@ class apiv2 {
      * @param {String} path The API path to 
      * @returns {Object}
      */
-    async fetch(path, options) {
+    async fetch(path, options?) {
         const headers = {
             ...await this.getAuthorizationHeaders(),
             'Content-Type': 'application/json',
-            ...options.headers ?? {}
+            ...options?.headers ?? {}
         };
 
         let params = '';
 
-        if (options.params) {
+        if (options?.params) {
             const urlParams = new URLSearchParams(options.params);
             params = `?${urlParams}`;
         }
