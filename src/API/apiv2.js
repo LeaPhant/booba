@@ -89,7 +89,7 @@ class apiv2 {
      * @param {String} path The API path to 
      * @returns {Object}
      */
-    async fetch(path, options?) {
+    async fetch(path, options) {
         const headers = {
             ...await this.getAuthorizationHeaders(),
             'Content-Type': 'application/json',
